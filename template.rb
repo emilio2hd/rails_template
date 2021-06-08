@@ -49,6 +49,31 @@ append_to_file ".rspec", "--color\n"
 copy_file "spec/support/database_cleaner.rb", "spec/support/database_cleaner.rb"
 copy_file "spec/support/shoulda_matchers.rb", "spec/support/shoulda_matchers.rb"
 
+uncomment_lines 'spec/rails_helper.rb', /Dir\[Rails.root.join\('spec', 'support', '\*\*', '\*.rb'\)\]/
+
+comment_lines 'spec/rails_helper.rb', /config\.fixture_path/
+comment_lines 'spec/rails_helper.rb', /config\.use_transactional_fixtures/
+
+insert_into_file "spec/rails_helper.rb", after: "ENV['RAILS_ENV'] ||= 'test'\n" do
+  <<~CODE
+
+if ENV['COVERAGE']
+  # Run COVERAGE=true bundle exec rspec in other to generate coverage report
+  require 'simplecov'
+  SimpleCov.start :rails
+end
+
+  CODE
+end
+
+insert_into_file "spec/rails_helper.rb", after: "# Add additional requires below this line. Rails is not loaded until this point!\n" do
+  [
+    "require 'shoulda/matchers'",
+    "require 'ffaker'",
+    "require 'factory_bot'"
+  ].join("\n")
+end
+
 # Rubocop
 copy_file "rubocop.yml", ".rubocop.yml"
 run "bundle exec rubocop --auto-gen-config"
