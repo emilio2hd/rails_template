@@ -37,7 +37,7 @@ chmod "bin/setup", "+x"
 copy_file "lib/tasks/factory_bot.rake", "lib/tasks/factory_bot.rake"
 
 # DotEnv files
-template "env.example.tt", ".env.example"
+template "env.example.tt", "env.example"
 
 # Database
 template "database.yml.tt", "config/database.yml", force: true
