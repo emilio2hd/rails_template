@@ -19,3 +19,30 @@ jobs:
             gem install bundler -v 2.1.4
             gem install rails -v "~> 6"
             rails -v
+
+  test:
+    working_directory: ~/project
+
+    docker:
+      - image: circleci/ruby:2.6
+      - image: circleci/postgres:9.5-alpine
+        environment:
+            POSTGRES_USER: demo-ruby
+            POSTGRES_DB: rails_blog_test
+            POSTGRES_PASSWORD: ""
+
+    steps:
+      - run:
+          name: Install rails 6
+          command: |
+            ls
+            ls ~/project/rails_template
+
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - build
+      - test:
+          requires:
+            - build
