@@ -9,9 +9,9 @@ jobs:
       - image: circleci/ruby:2.6
       - image: circleci/postgres:9.5-alpine
         environment:
-          POSTGRES_USER: demo-ruby
-          POSTGRES_DB: rails_blog_test
+          POSTGRES_USER: pg
           POSTGRES_PASSWORD: ""
+          POSTGRES_DB: test
 
     working_directory: ~/project
 
@@ -29,9 +29,32 @@ jobs:
       - run:
           name: Set git user
           command: |
+            # This is just to not fail when the template creates the first commit
             git config --global user.email "test@example.com"
             git config --global user.name "Test user"
 
       - run:
           name: Generate rails app using template
-          command: rails new blog -d postgresql -m ~/project/rails_template/template.rb
+          command: |
+            rails new blog -d postgresql \
+              --skip-sprockets --skip-turbolinks --skip-test --api --skip-bundle \
+              -m ~/project/rails_template/template.rb
+      - run:
+          name: Create .env file
+          command: |
+            cd blog
+            echo "APP_DB_HOST=localhost" >> .env
+            echo "APP_DB_PORT=5432" >> .env
+            echo "APP_DB_USER=pg" >> .env
+            echo "APP_DB_PASSWORD=''" >> .env
+
+      - run:
+          name: Wait for DB
+          command: dockerize -wait tcp://localhost:5432 -timeout 1m
+
+      - run:
+          name: Run bin/setup script
+          command: |
+            cd blog
+            bin/setup
+
