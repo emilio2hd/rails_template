@@ -8,13 +8,22 @@ def system!(*args)
   system(*args) || abort("\n== Command #{args} failed ==")
 end
 
+if Dir.glob("#{APP_ROOT}/{.env*}").empty?
+  puts <<~MSG
+    .env file not found!
+    Please, create a .env file from env.example.
+  MSG
+
+  exit 1
+end
+
 FileUtils.chdir APP_ROOT do
   puts '== Installing dependencies =='
   system! 'gem install bundler --conservative'
   system('bundle check') || system!('bundle install')
 
   puts "\n== Preparing database =="
-  system! 'bin/rails db:prepare'
+  system! 'bin/rails db:create'
 
   puts "\n== Migrating database =="
   system! 'bin/rails db:migrate'
