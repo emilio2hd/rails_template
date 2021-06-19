@@ -7,12 +7,18 @@ jobs:
   build:
     docker:
       - image: circleci/ruby:2.6
+      - image: circleci/postgres:9.5-alpine
+        environment:
+          POSTGRES_USER: demo-ruby
+          POSTGRES_DB: rails_blog_test
+          POSTGRES_PASSWORD: ""
 
     working_directory: ~/project
 
     steps:
       - checkout:
           path: ~/project/rails_template
+
       - run:
           name: Install rails 6
           command: |
@@ -20,29 +26,12 @@ jobs:
             gem install rails -v "~> 6"
             rails -v
 
-  test:
-    working_directory: ~/project
-
-    docker:
-      - image: circleci/ruby:2.6
-      - image: circleci/postgres:9.5-alpine
-        environment:
-            POSTGRES_USER: demo-ruby
-            POSTGRES_DB: rails_blog_test
-            POSTGRES_PASSWORD: ""
-
-    steps:
       - run:
-          name: Install rails 6
+          name: Set git user
           command: |
-            ls
-            ls ~/project/rails_template
+            git config --global user.email "test@example.com"
+            git config --global user.name "Test user"
 
-workflows:
-  version: 2
-  build_and_test:
-    jobs:
-      - build
-      - test:
-          requires:
-            - build
+      - run:
+          name: Generate rails app using template
+          command: rails new blog -d postgresql -m ~/project/rails_template/template.rb
