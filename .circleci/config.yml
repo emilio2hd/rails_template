@@ -1,0 +1,21 @@
+version: 2.1
+
+orbs:
+  ruby: circleci/ruby@1.1.3
+
+jobs:
+  build:
+    docker:
+      - image: circleci/ruby:2.6
+
+    working_directory: ~/project
+
+    steps:
+      - checkout:
+          path: ~/project/rails_template
+      - run:
+          name: Install rails 6
+          command: |
+            gem install bundler -v 2.1.4
+            gem install rails -v "~> 6"
+            rails -v
