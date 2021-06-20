@@ -1,6 +1,8 @@
 # rails_template
 An simple rails template
 
+[![rails_template](https://circleci.com/gh/emilio2hd/rails_template.svg?style=shield)](https://github.com/emilio2hd/rails_template)
+
 # What's inside the box?
 
 Some basic stuff used in development, like: byebug, rubocop, dotenv and pry.
