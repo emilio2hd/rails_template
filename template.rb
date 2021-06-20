@@ -24,8 +24,12 @@ run "bundle install"
 
 # Add .env as ignored file by git
 append_to_file '.gitignore', <<~CODE
-# Ignore dotenv-rails .env.
-.env
+
+# Ignore dotenv-rails .env file
+.env*
+
+# Ignore coverage folder
+coverage
 CODE
 
 template "README.md.tt", force: true
