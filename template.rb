@@ -48,6 +48,7 @@ append_to_file ".rspec", "--color\n"
 
 copy_file "spec/support/database_cleaner.rb", "spec/support/database_cleaner.rb"
 copy_file "spec/support/shoulda_matchers.rb", "spec/support/shoulda_matchers.rb"
+copy_file "spec/support/factory_bot.rb", "spec/support/factory_bot.rb"
 
 uncomment_lines 'spec/rails_helper.rb', /Dir\[Rails.root.join\('spec', 'support', '\*\*', '\*.rb'\)\]/
 
