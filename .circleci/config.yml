@@ -1,5 +1,10 @@
 version: 2.1
 
+references:
+  workspace_path: &workspace_path /home/circleci/project
+  rails_template_dir: &rails_template_dir /home/circleci/project/rails_template
+  blog_dir: &blog_dir /home/circleci/project/blog
+
 orbs:
   ruby: circleci/ruby@1.1.3
 
@@ -13,11 +18,15 @@ jobs:
           POSTGRES_PASSWORD: ""
           POSTGRES_DB: test
 
-    working_directory: ~/project
+    environment:
+      BLOG_DIR: *blog_dir
+      RAILS_TEMPLATE_DIR: *rails_template_dir
+
+    working_directory: *workspace_path
 
     steps:
       - checkout:
-          path: ~/project/rails_template
+          path: *rails_template_dir
 
       - run:
           name: Install rails 6
@@ -38,11 +47,11 @@ jobs:
           command: |
             rails new blog -d postgresql \
               --skip-sprockets --skip-turbolinks --skip-test --api --skip-bundle \
-              -m ~/project/rails_template/template.rb
+              -m $RAILS_TEMPLATE_DIR/template.rb
       - run:
           name: Create .env file
           command: |
-            cd blog
+            cd $BLOG_DIR
             echo "APP_DB_HOST=localhost" >> .env
             echo "APP_DB_PORT=5432" >> .env
             echo "APP_DB_USER=pg" >> .env
@@ -54,7 +63,22 @@ jobs:
 
       - run:
           name: Run bin/setup script
-          command: |
-            cd blog
-            bin/setup
+          command: cd $BLOG_DIR && bin/setup
 
+      - run:
+          name: Prepare for test
+          command: |
+            cd $BLOG_DIR
+
+            rails g scaffold Post title:string content:text --no-routing-specs --no-request-specs
+            rails db:migrate RAILS_ENV=test
+
+            cp -rfv $RAILS_TEMPLATE_DIR/test/app $BLOG_DIR
+            cp -rfv $RAILS_TEMPLATE_DIR/test/spec $BLOG_DIR
+
+      - run:
+          name: Run tests
+          command: |
+            cd $BLOG_DIR
+            bundle exec rake factory_bot:lint RAILS_ENV=test
+            COVERAGE=true bundle exec rspec
